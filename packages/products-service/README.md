@@ -12,7 +12,7 @@ Whenever dependencies in `package.json` are changed, run the following command:
 npm install
 ```
 
-To only install resolved dependencies in `package-lock.json`:
+To only install  dependencies in `package-lock.json`:
 
 ```sh
 npm ci
