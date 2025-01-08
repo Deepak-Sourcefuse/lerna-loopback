@@ -38,19 +38,19 @@ export class User extends Entity {
   })
   role: Role;
 
-  // @FormattedDate()
-  // @property({
-  //   type: 'string',
-  //   required: false,
-  // })
-  // createdOn?: string;
+  @FormattedDate()
+  @property({
+    type: 'string',
+    required: false,
+  })
+  createdOn?: string;
 
-  // @FormattedDate()
-  // @property({
-  //   type: 'string',
-  //   required: false,
-  // })
-  // modifiedOn?: string;
+  @FormattedDate()
+  @property({
+    type: 'string',
+    required: false,
+  })
+  modifiedOn?: string;
 
 
   constructor(data?: Partial<User>) {

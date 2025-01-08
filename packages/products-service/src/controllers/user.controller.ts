@@ -19,6 +19,7 @@ import {
 } from '@loopback/rest';
 import {User} from '../models';
 import {UserRepository} from '../repositories';
+import {formatDates} from '../models/formatted-date.decorator'; // Adjust the path as needed
 
 export class UserController {
   constructor(
@@ -44,7 +45,8 @@ export class UserController {
     })
     user: Omit<User, 'user_id'>,
   ): Promise<User> {
-    return this.userRepository.create(user);
+    const createdUser = await this.userRepository.create(user);
+    return formatDates(createdUser);
   }
 
   @get('/users/count')
@@ -73,7 +75,8 @@ export class UserController {
   async find(
     @param.filter(User) filter?: Filter<User>,
   ): Promise<User[]> {
-    return this.userRepository.find(filter);
+    const users = await this.userRepository.find(filter);
+    return users.map(user => formatDates(user));
   }
 
   @patch('/users')
@@ -108,7 +111,8 @@ export class UserController {
     @param.path.number('id') id: number,
     @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>
   ): Promise<User> {
-    return this.userRepository.findById(id, filter);
+    const user = await this.userRepository.findById(id, filter);
+    return formatDates(user);
   }
 
   @patch('/users/{id}')

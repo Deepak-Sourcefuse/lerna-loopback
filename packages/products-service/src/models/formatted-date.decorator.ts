@@ -22,8 +22,12 @@ export function formatDates(model: any) {
       key,
     );
     if (isFormattedDate && formattedModel[key]) {
-      formattedModel[key] = new Date(formattedModel[key]).toISOString();
+      const date = new Date(formattedModel[key]);
+      if (!isNaN(date.getTime())) {
+        formattedModel[key] = date.toISOString();
+      }
     }
   }
   return formattedModel;
 }
+
