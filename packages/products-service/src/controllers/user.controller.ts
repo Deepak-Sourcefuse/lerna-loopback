@@ -19,12 +19,28 @@ import {
 } from '@loopback/rest';
 import {User} from '../models';
 import {UserRepository} from '../repositories';
-import {formatDates} from '../models/formatted-date.decorator'; // Adjust the path as needed
+import {formatDates} from '../models/formatted-date.decorator'; 
+import {authenticate, TokenService} from '@loopback/authentication';
+import {
+  MyUserService,
+  TokenServiceBindings,
+  UserServiceBindings,
+} from '@loopback/authentication-jwt';
+import {inject} from '@loopback/core';
+
+interface Credentials {
+  email:string
+  password:string
+}
 
 export class UserController {
   constructor(
     @repository(UserRepository)
     public userRepository : UserRepository,
+    @inject(UserServiceBindings.USER_SERVICE)
+    public userService: MyUserService,
+    @inject(TokenServiceBindings.TOKEN_SERVICE)
+    public jwtService: TokenService,
   ) {}
 
   @post('/users')
@@ -150,5 +166,48 @@ export class UserController {
   })
   async deleteById(@param.path.number('id') id: number): Promise<void> {
     await this.userRepository.deleteById(id);
+  }
+
+  @post('/user/login')
+  @response(200, {
+    description: 'User Login',
+    content: {'application/json': {schema: {
+      type:'object',
+      properties:{
+        token:{
+          type:'string'
+        }
+      }
+    }}},
+  })
+  async login(@requestBody({
+    description:'login input',
+    required:true,
+    content: {
+      'application/json': {
+        schema:{
+          type:'object',
+          properties:{
+            email:{
+              type:'string'
+            },
+            password:{
+              type:'string'
+            }
+          }} ,
+      },
+    },
+  }) credentials:Credentials):Promise<{token: string}> {
+    // const userdata =await this.userRepository.findOne({where:{email:credentials.email}})
+    // if password match
+     const user = await this.userService.verifyCredentials(credentials);
+
+    // convert a User object into a UserProfile object (reduced set of properties)
+    const userProfile = this.userService.convertToUserProfile(user);
+
+    // create a JSON Web Token based on the user profile
+    const token = await this.jwtService.generateToken(userProfile);
+
+    return Promise.resolve({token:token})
   }
 }
